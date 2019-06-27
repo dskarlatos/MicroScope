@@ -11,14 +11,10 @@ microarchitectural replay attacks through page faults. The release includes the
 utility functions for many different attack scenarios as well as a skeleton kernel module
 with page fault replay capabilities.
 
+#Details on Kernel Source:
 The following link contains a modified linux kernel that exposes some functions
 to the MicroScope kernel module.
-
-#Details on Kernel Source:
-ubuntu_xenial_source.zip contains the kernel source 4.4.0-101
-modifications are in mm/memory.c to coordinate the attack (util.h for details)
-and arch/x86/mm/fault.c to allow kprobes to be installed on the
-page fault mechanism.
+https://drive.google.com/open?id=1433kWpnafmffyDPmW_HZSZlbbOPlwKyU
 A pre-compiled kernel is in compiled_deb.zip that contains the .deb files.
 
 #Kernel install steps:
