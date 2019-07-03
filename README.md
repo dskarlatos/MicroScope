@@ -1,10 +1,11 @@
 # MicroScope
-This repository contains the MicroScope framework used to perform noiseless microarchitectural side-channel attacks.
+This repository contains the MicroScope framework used to perform microarchitectural replay attacks.
 
 Please check our paper for details:
 
 MicroScope: Enabling Microarchitectural Replay Attacks. Dimitrios Skarlatos, Mengjia Yan, Bhargava Gopireddy, Read Sprabery, Josep Torrellas, and Christopher W. Fletcher. Proceedings of the 46th Intl. Symposium on Computer Architecture (ISCA), Phoenix, USA, June 2019.
 
+[You can find the MicroScope paper here!](http://skarlat2.web.engr.illinois.edu)
 
 The current release includes the MicroScope kernel module that can be used to perform
 microarchitectural replay attacks through page faults. The release includes the
@@ -12,9 +13,8 @@ utility functions for many different attack scenarios as well as a skeleton kern
 with page fault replay capabilities.
 
 #Details on Kernel Source:
-The following link contains a modified linux kernel that exposes some functions
-to the MicroScope kernel module.
-https://drive.google.com/open?id=1433kWpnafmffyDPmW_HZSZlbbOPlwKyU
+[Here you can find a modified linux kernel that exposes some functions
+to the MicroScope kernel module.](https://drive.google.com/open?id=1433kWpnafmffyDPmW_HZSZlbbOPlwKyU)
 A pre-compiled kernel is in compiled_deb.zip that contains the .deb files.
 
 #Kernel install steps:
