@@ -1,0 +1,213 @@
+diff -uNr arch/x86/mm/fault.c arch/x86/mm/fault.c
+--- arch/x86/mm/fault.c	2019-07-31 13:36:26.316493056 -0500
++++ arch/x86/mm/fault.c	2018-03-06 14:24:14.000000000 -0600
+@@ -1288,7 +1288,7 @@
+ 
+ 	check_v8086_mode(regs, address, tsk);
+ }
+-NOKPROBE_SYMBOL(__do_page_fault);
++//NOKPROBE_SYMBOL(__do_page_fault);
+ 
+ dotraplinkage void notrace
+ do_page_fault(struct pt_regs *regs, unsigned long error_code)
+@@ -1308,7 +1308,7 @@
+ 	__do_page_fault(regs, error_code, address);
+ 	exception_exit(prev_state);
+ }
+-NOKPROBE_SYMBOL(do_page_fault);
++//NOKPROBE_SYMBOL(do_page_fault);
+ 
+ #ifdef CONFIG_TRACING
+ static nokprobe_inline void
+@@ -1338,5 +1338,5 @@
+ 	__do_page_fault(regs, error_code, address);
+ 	exception_exit(prev_state);
+ }
+-NOKPROBE_SYMBOL(trace_do_page_fault);
++//NOKPROBE_SYMBOL(trace_do_page_fault);
+ #endif /* CONFIG_TRACING */
+diff -uNr mm/memory.c mm/memory.c
+--- mm/memory.c	2019-07-31 13:36:27.792500375 -0500
++++ mm/memory.c	2018-03-06 14:20:06.000000000 -0600
+@@ -3256,6 +3256,144 @@
+ 	return VM_FAULT_FALLBACK;
+ }
+ 
++pte_t *attack_pte, *fault_pte;
++EXPORT_SYMBOL(fault_pte);
++EXPORT_SYMBOL(attack_pte);
++
++int is_attack = 0;
++EXPORT_SYMBOL(is_attack);
++
++int print_msg_attack = 0;
++EXPORT_SYMBOL(print_msg_attack);
++
++int volatile pf_completed = 0;
++
++unsigned int volatile attack_bypass = 0;
++EXPORT_SYMBOL(attack_bypass);
++
++int get_pf_status(void){
++	return pf_completed;
++}
++EXPORT_SYMBOL(get_pf_status);
++
++int set_pf_status(int val){
++	pf_completed = val;
++	return pf_completed;
++}
++EXPORT_SYMBOL(set_pf_status);
++
++void set_print_msg_attack(int value){
++	print_msg_attack = value;
++	if(print_msg_attack){
++		printk(KERN_INFO "PGFH: print_msg_attack is active\n");
++	}
++	else{
++		printk(KERN_INFO "PGFH: print_msg_attack is disabled\n");
++	}
++}
++EXPORT_SYMBOL(set_print_msg_attack);
++
++void set_attack_value(pte_t *victim_pte, int value){
++	is_attack = value;
++	if(is_attack){
++			is_attack = value;
++			if(print_msg_attack){
++				printk(KERN_INFO "PGFH: set_attack_value attack is active\n");
++			}
++	}
++	else{
++		is_attack = 0;
++		if(print_msg_attack){
++			printk(KERN_INFO "PGFH: set_attack_value attack is disabled, %d\n", is_attack);
++			if(!victim_pte){
++				printk(KERN_INFO "PGFH: set_attack_value pte is null\n");
++			}
++		}
++	}
++}
++EXPORT_SYMBOL(set_attack_value);
++
++void set_attack_pte(pte_t *victim_pte, int value){
++	if(victim_pte){
++			attack_pte = victim_pte;
++			if(print_msg_attack){
++				printk(KERN_INFO "PGFH: set_attack_pte attack is active\n");
++				printk(KERN_INFO "PGFH: set_attack_pte, attack_pte %lu\n",*attack_pte);
++			}
++	}
++	else{
++		if(print_msg_attack){
++			is_attack = 0;
++			printk(KERN_INFO "PGFH: set_attack_pte attack is disabled, %d\n", is_attack);
++			if(!victim_pte){
++				printk(KERN_INFO "PGFH: set_attack_pte pte is null\n");
++			}
++		}
++	}
++}
++EXPORT_SYMBOL(set_attack_pte);
++
++void set_attack(pte_t *victim_pte, int value){
++	if(value && victim_pte){
++			is_attack = value;
++			attack_pte = victim_pte;
++			if(print_msg_attack){
++				printk(KERN_INFO "PGFH: set_attack attack is active\n");
++				printk(KERN_INFO "PGFH: set_attack, attack_pte %lu\n",*attack_pte);
++			}
++	}
++	else{
++		is_attack = 0;
++		if(print_msg_attack){
++			printk(KERN_INFO "PGFH: set_attack attack is disabled, %d\n", value);
++			if(!victim_pte){
++				printk(KERN_INFO "PGFH: set_attack pte is null\n");
++			}
++		}
++	}
++}
++EXPORT_SYMBOL(set_attack);
++
++int check_attack(pte_t *fault_pte){
++
++	if(is_attack){
++		if(print_msg_attack){
++			if(fault_pte && attack_pte){
++				printk(KERN_INFO "PGFH: check attack, fault_pte %lu, attack_pte %lu\n",*fault_pte,*attack_pte);
++				printk(KERN_INFO "PGFH: check attack, pte_same = %d\n", pte_same(*fault_pte,*attack_pte));
++				unsigned long v0,v1;
++				v0 = pte_pfn(*fault_pte);
++				v1 = pte_pfn(*attack_pte);
++				printk(KERN_INFO "PGFH: check attack, fault_pte pfn %lu, attack_pte pfn %lu\n",v0,v1);
++
++			}
++			else{
++				if(!fault_pte){
++					printk(KERN_INFO "PGFH: check attack fault_pte is null\n");
++				}
++				if(!attack_pte){
++					printk(KERN_INFO "PGFH: check attack attack_pte is null\n");
++				}
++			}
++		}
++		if(fault_pte && attack_pte){
++			unsigned long v0,v1;
++			v0 = pte_pfn(*fault_pte);
++			v1 = pte_pfn(*attack_pte);
++			if(v0 && v1){
++				return pte_same(*fault_pte,*attack_pte);
++			}
++		}
++	}
++	return 0;
++}
++EXPORT_SYMBOL(check_attack);
++
++static noinline void notify_attack(pte_t *curr_pte){
++	fault_pte = curr_pte;
++}
++EXPORT_SYMBOL(notify_attack);
++
+ /*
+  * These routines also need to handle stuff like marking pages dirty
+  * and/or accessed for architectures that don't do it in hardware (most
+@@ -3290,16 +3428,27 @@
+ 	entry = *pte;
+ 	barrier();
+ 	if (!pte_present(entry)) {
+-		if (pte_none(entry)) {
+-			if (vma_is_anonymous(vma))
+-				return do_anonymous_page(mm, vma, address,
+-							 pte, pmd, flags);
+-			else
+-				return do_fault(mm, vma, address, pte, pmd,
+-						flags, entry);
++		// check if attack caused the present bit flip
++		if (check_attack(pte)){
++			notify_attack(pte);
++			if(print_msg_attack){
++				 printk(KERN_INFO "PGFH: Going through bypass\n");
++			}
++			return 0;
+ 		}
+-		return do_swap_page(mm, vma, address,
+-					pte, pmd, flags, entry);
++		else{
++			if (pte_none(entry)) {
++				if (vma_is_anonymous(vma))
++					return do_anonymous_page(mm, vma, address,
++									pte, pmd, flags);
++				else
++					return do_fault(mm, vma, address, pte, pmd,
++							flags, entry);
++			}
++			return do_swap_page(mm, vma, address,
++						pte, pmd, flags, entry);
++		}
++
+ 	}
+ 
+ 	if (pte_protnone(entry))
