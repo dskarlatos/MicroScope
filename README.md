@@ -28,7 +28,8 @@ utility functions for many different attack scenarios as well as a skeleton kern
 with page fault replay capabilities.
 
 ## Details on Kernel Source:
-[Here you can find a modified linux kernel that exposes some functions
+A kernel patch against ubuntu-4.4.0-101.124 can be found under the kernel_patch directory.
+For convenience [here you can find a precompiled kernel that already exposes some functions
 to the MicroScope kernel module.](https://drive.google.com/open?id=1433kWpnafmffyDPmW_HZSZlbbOPlwKyU)
 A pre-compiled kernel is in compiled_deb.zip that contains the .deb files.
 
