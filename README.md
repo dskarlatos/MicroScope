@@ -48,6 +48,6 @@ Run only once:
 
 Build and Install:
 1) make
-2) install the module with insmod microscope_mod.ko
+2) install the module with insmod microscope.ko
 3) dmesg will print a welcome message from microscope
 4) remove the module with rmmod microscope

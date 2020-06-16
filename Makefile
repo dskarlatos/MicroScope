@@ -2,10 +2,10 @@
 # Contact: skarlat2@illinois.edu - http://skarlat2.web.engr.illinois.edu/
 # MicroScope Kernel Module Makefile
 
-obj-m += microscope_mod.o
-nuke-objs := microscope_mod.o util.o
-CFLAGS_nuke.o := -O0
-CFLAGS_nuke_mod.o := -O0
+obj-m += microscope.o
+microscope-objs := microscope_mod.o util.o
+CFLAGS_microscope.o := -O0
+CFLAGS_microscope_mod.o := -O0
 
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
