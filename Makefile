@@ -16,9 +16,3 @@ default:
 	$(MAKE) V=1 -C $(KDIR) M=$(PWD) modules
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
-
-test:
-	sudo dmesg -C
-	sudo insmod microscope.ko
-	sudo rmmod microscope.ko
-	dmesg
